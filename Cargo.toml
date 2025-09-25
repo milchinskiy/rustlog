@@ -1,0 +1,44 @@
+[package]
+rust-version = "1.70"
+edition = "2021"
+name = "rustlog"
+version = "0.1.0"
+license = "MIT OR Apache-2.0"
+description = "A small, dependency-light logging crate with a pragmatic API, color (optional), groups, and a scope timer"
+repository = "https://github.com/milchinskiy/rustlog"
+homepage = "https://github.com/milchinskiy/rustlog"
+keywords = ["logger", "logging", "log", "no_std"]
+categories = ["development-tools::debugging"]
+readme = "README.md"
+
+[features]
+default = ["std", "thread-id", "timestamp", "color", "file-line"]
+
+std = []                           # enable std I/O, env, atomics
+thread-id = []                     # include thread-id printing code
+timestamp = []                     # include timestamp printing code (UTC)
+color = []                         # include colorization code
+file-line = []                     # include file/line printing code
+localtime = ["dep:time"]           # opt-in local-time formatting via `time`
+
+[lints.clippy]
+pedantic = "warn"
+correctness = "warn"
+complexity = "warn"
+performance = "warn"
+nursery = "warn"
+style = "warn"
+cargo = "warn"
+redundant_pub_crate = "warn"
+
+[dependencies]
+
+# Optional deps (kept out of default)
+[dependencies.time]
+version = "0.3"
+optional = true
+default-features = false
+features = ["formatting", "local-offset"]
+
+[workspace]
+members = ["no_std_smoke"]
