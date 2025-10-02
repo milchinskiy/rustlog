@@ -2,19 +2,18 @@
 rust-version = "1.70"
 edition = "2021"
 name = "rustlog"
-version = "0.1.0"
+version = "0.2.0"
 license = "MIT OR Apache-2.0"
 description = "A small, dependency-light logging crate with a pragmatic API, color (optional), groups, and a scope timer"
 repository = "https://github.com/milchinskiy/rustlog"
 homepage = "https://github.com/milchinskiy/rustlog"
-keywords = ["logger", "logging", "log", "no_std"]
+keywords = ["logger", "logging", "log"]
 categories = ["development-tools::debugging"]
 readme = "README.md"
 
 [features]
-default = ["std", "thread-id", "timestamp", "color", "file-line"]
+default = ["thread-id", "timestamp", "color", "file-line"]
 
-std = []                           # enable std I/O, env, atomics
 thread-id = []                     # include thread-id printing code
 timestamp = []                     # include timestamp printing code (UTC)
 color = []                         # include colorization code
@@ -39,6 +38,3 @@ version = "0.3"
 optional = true
 default-features = false
 features = ["formatting", "local-offset"]
-
-[workspace]
-members = ["no_std_smoke"]

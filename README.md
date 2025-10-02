@@ -1,6 +1,6 @@
 # rustlog
 
-A small, dependency‑light logging crate with a pragmatic API, color (optional), groups, and a scope timer. Works in `std` (default) and `no_std` builds.
+A small, dependency‑light logging crate with a pragmatic API, color (optional), groups, and a scope timer.
 
 ## Features at a glance
 
@@ -11,7 +11,6 @@ A small, dependency‑light logging crate with a pragmatic API, color (optional)
 - **Color (optional):** `Always` / `Never` / `Auto` (TTY detection for Stdout/Stderr)
 - **Env config:** `RUST_LOG_LEVEL`, `RUST_LOG_COLOR`, `RUST_LOG_SHOW_TID`, `RUST_LOG_SHOW_TIME`
 - **Compile‑time floor:** `debug` includes `trace`, `release` may strip `trace`/`debug`
-- **no\_std:** API/macro surface available; `emit` is a no‑op sink (no I/O)
 
 > **MSRV:** Rust **1.70+** (uses `OnceLock` and `std::io::IsTerminal`).
 
@@ -22,14 +21,10 @@ A small, dependency‑light logging crate with a pragmatic API, color (optional)
 ```toml
 [dependencies]
 rustlog = "x.x"
-
-# no_std consumer (no I/O):
-# rustlog = { version = "x.x", default-features = false }
 ```
 
 ### Feature flags
 
-- `std` *(default)* — enables I/O, env parsing, timestamping, colors
 - `color` — ANSI colors; `Auto` uses TTY detection for Stdout/Stderr
 - `timestamp` — prepend timestamp to each line
 - `localtime` *(optional, only if you enable it)* — with `timestamp`, format local time instead of UTC
@@ -228,18 +223,6 @@ Example:
 ```bash
 RUST_LOG_LEVEL=debug RUST_LOG_COLOR=auto RUST_LOG_SHOW_TIME=1 cargo run
 ```
-
----
-
-## no\_std
-
-With `default-features = false`:
-
-- Macros expand; `emit` is a **no‑op** sink (no I/O).
-- Runtime toggles exist for API parity, but have no effect.
-- `scope_time!` executes the block without logging.
-
-This keeps the crate linkable in bare‑metal environments while leaving output to the application.
 
 ---
 
