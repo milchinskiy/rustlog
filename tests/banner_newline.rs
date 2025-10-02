@@ -6,7 +6,7 @@ fn banner_has_trailing_newline() {
     let (buf, _guard) = attach_mem_sink();
     reset_runtime();
 
-    rustlog::banner();
+    rustlog::banner!();
 
     let bytes = buf.lock().unwrap().clone();
     assert!(bytes.ends_with(b"\n"), "banner must end with a newline");

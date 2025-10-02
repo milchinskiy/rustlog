@@ -527,16 +527,23 @@ mod imp {
     }
 
     /// Emit a banner
-    pub fn banner() {
-        let name = env!("CARGO_PKG_NAME");
-        let ver = env!("CARGO_PKG_VERSION");
-        let mode = if cfg!(debug_assertions) {
-            "debug"
-        } else {
-            "release"
+    #[inline]
+    pub fn banner_with(name: &str, version: &str) {
+        emit_raw_bytes(name.as_bytes());
+        emit_raw_bytes(b" v");
+        emit_raw_bytes(version.as_bytes());
+        emit_raw_bytes(b"\n");
+    }
+
+    #[macro_export]
+    /// Emit a banner
+    macro_rules! banner {
+        () => {
+            $crate::banner_with(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
         };
-        let line = format!("{name} {ver} ({mode})\n");
-        emit_raw_bytes(line.as_bytes());
+        ($name:expr, $version:expr) => {
+            $crate::banner_with($name, $version)
+        };
     }
 
     #[cfg(test)]
@@ -702,6 +709,8 @@ mod imp {
         // no_std: no I/O; define your own sink behind a feature if needed
     }
 
+    fn emit_raw_bytes(_bytes: &[u8]) {}
+
     // ===== Macros =====
     #[macro_export]
     macro_rules! __rustlog_log {
@@ -741,7 +750,7 @@ mod imp {
 // Re-exports for crate users
 #[cfg(feature = "std")]
 pub use imp::{
-    banner, ct_enabled, emit, init_from_env, level, set_color_mode, set_file, set_level,
+    banner_with, ct_enabled, emit, init_from_env, level, set_color_mode, set_file, set_level,
     set_show_file_line, set_show_group, set_show_thread_id, set_show_time, set_target, set_writer,
     ColorMode, Level, Target, TimerGuard,
 };

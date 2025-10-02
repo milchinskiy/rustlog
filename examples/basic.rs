@@ -15,7 +15,7 @@ fn main() {
     set_show_time(true);
     init_from_env();
     
-    banner();
+    banner!();
 
     trace!("hello {}", "world");
     debug!("hello {}", "world");

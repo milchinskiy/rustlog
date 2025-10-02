@@ -187,6 +187,31 @@ set_show_file_line(true); // include `<file:line>`
 
 ---
 
+## Application banner (app name & version)
+
+Use the `banner!()` macro to print your app’s name and version as a single info‑level line.
+
+```rust
+use rustlog::*;
+
+fn main() {
+    set_target(Target::Stderr);
+    set_level(Level::Info);
+
+    banner!(); // -> "myapp v1.2.3"
+}
+```
+
+### Customize name/version explicitly
+
+If you don’t want to use Cargo metadata, pass strings directly:
+
+```rust
+banner!("myapp", "1.2.3");
+```
+
+`banner!()` is allocation‑free and safe to call early during startup.
+
 ## Environment variables
 
 Call `init_from_env()` once at startup to read these:
