@@ -450,7 +450,7 @@ macro_rules! scope_time {
     }};
 }
 /// Human readable duration
-pub struct HumanDuration(std::time::Duration);
+pub struct HumanDuration(pub std::time::Duration);
 impl core::fmt::Display for HumanDuration {
     fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let d = self.0;
@@ -489,6 +489,11 @@ impl core::fmt::Display for HumanDuration {
             let ms = nanos / 1_000_000;
             write!(formatter, "{days}d {h:02}h{m:02}m{s:02}.{ms:03}s")
         }
+    }
+}
+impl From<std::time::Duration> for HumanDuration {
+    fn from(d: std::time::Duration) -> Self {
+        Self(d)
     }
 }
 
