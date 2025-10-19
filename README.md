@@ -226,6 +226,21 @@ RUST_LOG_LEVEL=debug RUST_LOG_COLOR=auto RUST_LOG_SHOW_TIME=1 cargo run
 
 ---
 
+## Local Instance
+
+Enable multiple logger instances with independent settings while keeping the root API (`rustlog::info!`, etc.) simple and unchanged for default usage.
+
+```rust
+rustlog::set_level(Level::Info);
+rustlog::info!("default path");
+
+// local instance
+use rustlog::local::{Logger, LoggerBuilder};
+use rustlog::local::info as linfo;
+let lg = Logger::builder().file("trace.log").level(Level::Trace).build_static()?;
+linfo!(lg, "per‑instance output");
+```
+
 ## Testing tips
 
 - To capture output in tests, install a memory writer and select `Target::Writer` **before** the first log in that test binary.

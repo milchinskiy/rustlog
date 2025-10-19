@@ -8,6 +8,9 @@ use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
 use std::sync::{Mutex as StdMutex, OnceLock};
 use std::time::Instant;
 
+/// Local logger
+pub mod local;
+
 // ===== Levels =====
 /// Log levels
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
