@@ -2,12 +2,13 @@ use core::fmt::Arguments;
 use std::io::{self, IsTerminal, Write};
 use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
 use std::sync::{Arc, Mutex as StdMutex};
+use std::time::Instant;
 
 // Pull from crate root
 use crate::EMIT_LOCK;
 #[cfg(feature = "color")]
 use crate::{color, level_color};
-use crate::{ct_enabled, write_level, write_timestamp, ColorMode, Level, Target};
+use crate::{ct_enabled, write_level, write_timestamp, ColorMode, HumanDuration, Level, Target};
 
 /// Local logger
 pub struct Logger {
@@ -212,11 +213,58 @@ impl Logger {
     }
 }
 
+/// Timer guard
+pub struct TimerGuard<'a> {
+    logger: &'a Logger,
+    label: &'static str,
+    start: Instant,
+    file: &'static str,
+    line: u32,
+}
+impl<'a> TimerGuard<'a> {
+    /// Create a new timer guard
+    #[inline]
+    #[must_use]
+    pub fn new_at(logger: &'a Logger, label: &'static str, file: &'static str, line: u32) -> Self {
+        Self {
+            logger,
+            label,
+            start: Instant::now(),
+            file,
+            line,
+        }
+    }
+}
+impl Drop for TimerGuard<'_> {
+    fn drop(&mut self) {
+        let elapsed = self.start.elapsed();
+        self.logger.emit_to(
+            Level::Info,
+            Some(self.label),
+            self.file,
+            self.line,
+            format_args!("took {}", HumanDuration(elapsed)),
+        );
+    }
+}
+#[macro_export]
+/// Macro for timing a scope
+macro_rules! __rustlog_local_scope_time {
+    ($lg:expr, $label:expr, $body:block) => {{
+        let __lg = $lg;
+        let _guard = $crate::local::TimerGuard::new_at(__lg, $label, file!(), line!());
+        $body
+    }};
+}
+
 // Helper conversions if you keep enums repr(u8)
 impl From<u8> for ColorMode {
     fn from(x: u8) -> Self {
-        #[allow(unsafe_code)]
-        unsafe { core::mem::transmute(x) }
+        match x {
+            1 => Self::Always,
+            2 => Self::Never,
+            _ => Self::Auto,
+        }
     }
 }
 
@@ -241,7 +289,7 @@ impl Default for LoggerBuilder {
             show_group: None,
             show_file_line: None,
             color_mode: None,
-            target: Target::Stdout,
+            target: Target::Stderr,
             writer: None,
             file_path: None,
         }
@@ -435,12 +483,11 @@ pub use crate::__rustlog_local_info as info;
 pub use crate::__rustlog_local_trace as trace;
 pub use crate::__rustlog_local_warn as warn;
 
-/// Re-export ergonomic group names
-pub mod group {
-    pub use crate::__rustlog_local_debug_group as debug;
-    pub use crate::__rustlog_local_error_group as error;
-    pub use crate::__rustlog_local_fatal_group as fatal;
-    pub use crate::__rustlog_local_info_group as info;
-    pub use crate::__rustlog_local_trace_group as trace;
-    pub use crate::__rustlog_local_warn_group as warn;
-}
+pub use crate::__rustlog_local_debug_group as debug_group;
+pub use crate::__rustlog_local_error_group as error_group;
+pub use crate::__rustlog_local_fatal_group as fatal_group;
+pub use crate::__rustlog_local_info_group as info_group;
+pub use crate::__rustlog_local_trace_group as trace_group;
+pub use crate::__rustlog_local_warn_group as warn_group;
+
+pub use crate::__rustlog_local_scope_time as scope_time;
