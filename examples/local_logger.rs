@@ -3,9 +3,9 @@ use rustlog::local::Logger;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let logger = Logger::builder()
-        .level(rustlog::Level::Debug)
-        .show_thread_id(false)
-        .show_file_line(false)
+        .set_level(rustlog::Level::Debug)
+        .set_show_thread_id(false)
+        .set_show_file_line(false)
         .build()?;
 
     info!(&logger, "Hello, local world!");

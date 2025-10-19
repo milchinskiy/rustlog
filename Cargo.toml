@@ -2,7 +2,7 @@
 rust-version = "1.70"
 edition = "2021"
 name = "rustlog"
-version = "0.3.0"
+version = "0.3.1"
 license = "MIT OR Apache-2.0"
 description = "A small, dependency-light logging crate with a pragmatic API, color (optional), groups, and a scope timer"
 repository = "https://github.com/milchinskiy/rustlog"

@@ -447,8 +447,11 @@ macro_rules! fatal_group { ($grp:expr, $($t:tt)+) => { $crate::__rustlog_log!($c
 /// Time a block
 #[macro_export]
 macro_rules! scope_time {
+    ($label:expr) => {
+        let _scope_time_guard = $crate::TimerGuard::new_at($label, file!(), line!());
+    };
     ($label:expr, $body:block) => {{
-        let _guard = $crate::TimerGuard::new_at($label, file!(), line!());
+        let _scope_time_guard = $crate::TimerGuard::new_at($label, file!(), line!());
         $body
     }};
 }

@@ -250,9 +250,13 @@ impl Drop for TimerGuard<'_> {
 #[macro_export]
 /// Macro for timing a scope
 macro_rules! __rustlog_local_scope_time {
+    ($lg:expr, $label:expr) => {
+        let _rustlog_scope_time_guard =
+            $crate::local::TimerGuard::new_at($lg, $label, file!(), line!());
+    };
     ($lg:expr, $label:expr, $body:block) => {{
-        let __lg = $lg;
-        let _guard = $crate::local::TimerGuard::new_at(__lg, $label, file!(), line!());
+        let _rustlog_scope_time_guard =
+            $crate::local::TimerGuard::new_at($lg, $label, file!(), line!());
         $body
     }};
 }
@@ -300,42 +304,42 @@ impl LoggerBuilder {
     #[inline]
     #[must_use]
     /// Set the log level
-    pub const fn level(mut self, l: Level) -> Self {
+    pub const fn set_level(mut self, l: Level) -> Self {
         self.level = l;
         self
     }
     #[inline]
     #[must_use]
     /// Show the thread id
-    pub const fn show_thread_id(mut self, on: bool) -> Self {
+    pub const fn set_show_thread_id(mut self, on: bool) -> Self {
         self.show_tid = Some(on);
         self
     }
     #[inline]
     #[must_use]
     /// Show the timestamp
-    pub const fn show_time(mut self, on: bool) -> Self {
+    pub const fn set_show_time(mut self, on: bool) -> Self {
         self.show_time = Some(on);
         self
     }
     #[inline]
     #[must_use]
     /// Show the log group
-    pub const fn show_group(mut self, on: bool) -> Self {
+    pub const fn set_show_group(mut self, on: bool) -> Self {
         self.show_group = Some(on);
         self
     }
     #[inline]
     #[must_use]
     /// Show the file and line number
-    pub const fn show_file_line(mut self, on: bool) -> Self {
+    pub const fn set_show_file_line(mut self, on: bool) -> Self {
         self.show_file_line = Some(on);
         self
     }
     #[inline]
     #[must_use]
     /// Set the color mode
-    pub const fn color_mode(mut self, m: ColorMode) -> Self {
+    pub const fn set_color_mode(mut self, m: ColorMode) -> Self {
         self.color_mode = Some(m);
         self
     }
@@ -356,7 +360,7 @@ impl LoggerBuilder {
     #[inline]
     #[must_use]
     /// Set the output target to a custom writer
-    pub fn writer(mut self, w: Box<dyn Write + Send>) -> Self {
+    pub fn set_writer(mut self, w: Box<dyn Write + Send>) -> Self {
         self.target = Target::Writer;
         self.writer = Some(Arc::new(StdMutex::new(w)));
         self

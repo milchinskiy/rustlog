@@ -39,12 +39,12 @@ fn default_and_local_coexist_and_use_own_settings() -> io::Result<()> {
     rustlog::set_show_file_line(false);
 
     let lg = Logger::builder()
-        .writer(l_writer)
-        .level(Level::Trace)
-        .show_time(false)
-        .show_thread_id(false)
-        .show_group(false)
-        .show_file_line(true)
+        .set_writer(l_writer)
+        .set_level(Level::Trace)
+        .set_show_time(false)
+        .set_show_thread_id(false)
+        .set_show_group(false)
+        .set_show_file_line(true)
         .build_static()?; // ergonomic for macros
 
     rustlog::info!("G: info");

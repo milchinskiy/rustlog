@@ -1,6 +1,6 @@
 # rustlog
 
-A small, dependency‑light logging crate with a pragmatic API, color (optional), groups, and a scope timer.
+A small, dependency-light logging crate with a pragmatic API, color (optional), groups, and a scope timer.
 
 ## Features at a glance
 
@@ -10,7 +10,7 @@ A small, dependency‑light logging crate with a pragmatic API, color (optional)
 - **Runtime toggles:** show time, thread id, file\:line, group
 - **Color (optional):** `Always` / `Never` / `Auto` (TTY detection for Stdout/Stderr)
 - **Env config:** `RUST_LOG_LEVEL`, `RUST_LOG_COLOR`, `RUST_LOG_SHOW_TID`, `RUST_LOG_SHOW_TIME`
-- **Compile‑time floor:** `debug` includes `trace`, `release` may strip `trace`/`debug`
+- **Compile-time floor:** `debug` includes `trace`, `release` may strip `trace`/`debug`
 
 > **MSRV:** Rust **1.70+** (uses `OnceLock` and `std::io::IsTerminal`).
 
@@ -40,7 +40,7 @@ rustlog = "x.x"
 use rustlog::*;
 
 fn main() {
-    // Choose output early; first call wins (set‑once semantics).
+    // Choose output early; first call wins (set-once semantics).
     set_target(Target::Stderr); // default if unset
     // set_file("/var/log/app.log").unwrap(); // or write to a file
 
@@ -49,7 +49,7 @@ fn main() {
     set_show_thread_id(false);  // requires `thread-id` feature
     set_show_file_line(true);
 
-    // Runtime level (compile‑time floor still applies)
+    // Runtime level (compile-time floor still applies)
     set_level(Level::Info);
 
     info!("hello {}", 42);
@@ -93,14 +93,14 @@ set_writer(Box::new(Mem(Vec::new())));
 set_target(Target::Writer);
 ```
 
-> With `ColorMode::Auto`, `Writer` is treated as non‑TTY (no color). Force color with `ColorMode::Always` if you control the sink.
+> With `ColorMode::Auto`, `Writer` is treated as non-TTY (no color). Force color with `ColorMode::Always` if you control the sink.
 
 ---
 
 ## Levels & filtering
 
 - **Macros:** `trace!`, `debug!`, `info!`, `warn!`, `error!`, `fatal!`
-- **Compile‑time floor:**
+- **Compile-time floor:**
   - `debug` builds include `trace`/`debug` code paths.
   - `release` builds may compile out `trace`/`debug`; `info+` always remains.
 - **Runtime filter:** `set_level(Level::Info)` etc.
@@ -184,7 +184,7 @@ set_show_file_line(true); // include `<file:line>`
 
 ## Application banner (app name & version)
 
-Use the `banner!()` macro to print your app’s name and version as a single info‑level line.
+Use the `banner!()` macro to print your app’s name and version as a single info-level line.
 
 ```rust
 use rustlog::*;
@@ -205,7 +205,7 @@ If you don’t want to use Cargo metadata, pass strings directly:
 banner!("myapp", "1.2.3");
 ```
 
-`banner!()` is allocation‑free and safe to call early during startup.
+`banner!()` is allocation-free and safe to call early during startup.
 
 ## Environment variables
 
@@ -215,8 +215,8 @@ Call `init_from_env()` once at startup to read these:
 | -------------------- | --------------------------------------------- | ------------------ |
 | `RUST_LOG_LEVEL`     | `trace` `debug` `info` `warn` `error` `fatal` | Sets runtime level |
 | `RUST_LOG_COLOR`     | `always` `never` `auto`                       | Sets color mode    |
-| `RUST_LOG_SHOW_TID`  | `1` `true` *(case‑insensitive)*               | Show thread id     |
-| `RUST_LOG_SHOW_TIME` | `1` `true` *(case‑insensitive)*               | Show timestamp     |
+| `RUST_LOG_SHOW_TID`  | `1` `true` *(case-insensitive)*               | Show thread id     |
+| `RUST_LOG_SHOW_TIME` | `1` `true` *(case-insensitive)*               | Show timestamp     |
 
 Example:
 
@@ -237,14 +237,14 @@ rustlog::info!("default path");
 // local instance
 use rustlog::local::{Logger, LoggerBuilder};
 use rustlog::local::info as linfo;
-let lg = Logger::builder().file("trace.log").level(Level::Trace).build_static()?;
-linfo!(lg, "per‑instance output");
+let lg = Logger::builder().file("trace.log").set_level(Level::Trace).build_static()?;
+linfo!(&lg, "per-instance output");
 ```
 
 ## Testing tips
 
 - To capture output in tests, install a memory writer and select `Target::Writer` **before** the first log in that test binary.
-- Targets are set‑once. Place target selection at the top of `main()` or in a per‑test binary.
+- Targets are set-once. Place target selection at the top of `main()` or in a per-test binary.
 - Each log line is emitted with a single `write_all`, guarded by a mutex to avoid interleaving across threads.
 
 ---

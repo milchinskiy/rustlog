@@ -35,11 +35,11 @@ fn local_scope_time_block_only_writes_to_local() -> io::Result<()> {
 
     let (l_writer, l_buf) = Mem::new();
     let lg = Logger::builder()
-        .writer(l_writer)
-        .level(Level::Trace)
-        .show_time(false)
-        .show_group(true)
-        .show_file_line(true)
+        .set_writer(l_writer)
+        .set_level(Level::Trace)
+        .set_show_time(false)
+        .set_show_group(true)
+        .set_show_file_line(true)
         .build_static()?;
 
     rustlog::local::scope_time!(lg, "block-run", {
