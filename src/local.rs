@@ -101,7 +101,7 @@ impl Logger {
     }
     /// Set the output target to a file.
     /// # Errors
-    /// This function will return an error if the file cannot be opened for
+    /// This function will return an error if the file cannot be opened for writing.
     pub fn set_file(&self, path: impl AsRef<std::path::Path>) -> io::Result<()> {
         let f = std::fs::OpenOptions::new()
             .create(true)

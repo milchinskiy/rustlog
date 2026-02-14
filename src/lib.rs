@@ -116,17 +116,21 @@ pub enum Target {
 static TARGET: OnceLock<Target> = OnceLock::new();
 static WRITER: OnceLock<StdMutex<Box<dyn Write + Send>>> = OnceLock::new();
 /// Sets the output target once. Subsequent calls are ignored.
-/// Call this early (e.g., at program start) if you need `Stdout`.
+/// Call this early (e.g., at program start) if you need `Stdout` or a custom `Writer`.
 pub fn set_target(t: Target) {
     let _ = TARGET.set(t);
 }
 /// Sets the output target to a custom writer.
+///
+/// Note: the target is configured only once; call this before emitting any logs.
 pub fn set_writer(w: Box<dyn Write + Send>) {
     let _ = WRITER.set(StdMutex::new(w));
+    // Best-effort: if the target hasn't been selected yet, route output to the writer.
+    let _ = TARGET.set(Target::Writer);
 }
 /// Sets the output target to a file.
 /// # Errors
-/// This function will return an error if the file cannot be opened for
+/// This function will return an error if the file cannot be opened for writing.
 pub fn set_file(path: impl AsRef<Path>) -> io::Result<()> {
     let f = std::fs::OpenOptions::new()
         .create(true)
@@ -177,6 +181,19 @@ const fn level_color(l: Level) -> &'static str {
         Level::Warn => WARN,
         Level::Error => ERROR,
         Level::Fatal => FATAL,
+    }
+}
+
+/// Returns the uppercase level name
+#[inline]
+const fn level_name(l: Level) -> &'static str {
+    match l {
+        Level::Trace => "TRACE",
+        Level::Debug => "DEBUG",
+        Level::Info => "INFO",
+        Level::Warn => "WARN",
+        Level::Error => "ERROR",
+        Level::Fatal => "FATAL",
     }
 }
 
@@ -253,7 +270,7 @@ pub fn init_from_env() {
     }
 }
 
-/// Correct Gregorian Y-M-D from days since 1970-01-01 (no deps).
+/// Correct Gregorian Y-M-D from days since 1970-01-01
 #[inline]
 #[allow(dead_code)]
 const fn civil_from_days_utc(days_since_unix_epoch: i64) -> (i32, u32, u32) {
@@ -326,16 +343,10 @@ fn write_tid(mut w: impl Write) {
 fn write_level(mut w: impl Write, l: Level, use_color: bool) {
     #[cfg(feature = "color")]
     if use_color {
-        let _ = write!(
-            w,
-            "{}{:<5}{}",
-            level_color(l),
-            format!("{l:?}").to_uppercase(),
-            color::RST
-        );
+        let _ = write!(w, "{}{:<5}{}", level_color(l), level_name(l), color::RST);
         return;
     }
-    let _ = write!(w, "{:<5}", format!("{l:?}").to_uppercase());
+    let _ = write!(w, "{:<5}", level_name(l));
 }
 
 fn emit_raw_bytes(bytes: &[u8]) {
@@ -381,6 +392,7 @@ pub fn emit(
     }
     if SHOW_GROUP.load(Ordering::Relaxed) {
         if let Some(g) = group {
+            #[cfg(feature = "color")]
             if use_color {
                 let _ = write!(
                     &mut buf,
@@ -391,6 +403,10 @@ pub fn emit(
                     color::RST
                 );
             } else {
+                let _ = write!(&mut buf, " [{g}]");
+            }
+            #[cfg(not(feature = "color"))]
+            {
                 let _ = write!(&mut buf, " [{g}]");
             }
         }
