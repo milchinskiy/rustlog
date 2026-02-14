@@ -16,6 +16,17 @@ fn utc_timestamp_prefix() {
     let s = String::from_utf8(buf.lock().unwrap().clone()).unwrap();
     let line = s.lines().next().unwrap_or("");
     assert!(line.contains("Z "), "expected UTC 'Z ' marker before level: {line}");
+
+    // Sanity-check the date conversion (regression test for incorrect year math).
+    // We only assert a broad range to avoid brittle, time-dependent tests.
+    let year: i32 = line
+        .get(0..4)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or_default();
+    assert!(
+        (1970..=2100).contains(&year),
+        "unexpected year prefix (bad timestamp date conversion?): {line}"
+    );
 }
 
 #[cfg(feature = "localtime")]

@@ -1,4 +1,4 @@
-#![warn(missing_docs, unsafe_code)]
+#![forbid(missing_docs, unsafe_code)]
 //! A minimal logging crate.
 
 use core::fmt::Arguments;
@@ -11,7 +11,6 @@ use std::time::Instant;
 /// Local logger
 pub mod local;
 
-// ===== Levels =====
 /// Log levels
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 #[repr(u8)]
@@ -30,7 +29,6 @@ pub enum Level {
     Fatal,
 }
 
-// ===== Compile-time minimum level (simplified) =====
 // In debug builds, include all levels (Trace+).
 // In release builds, compile out TRACE/DEBUG entirely for zero overhead.
 #[cfg(debug_assertions)]
@@ -105,7 +103,6 @@ impl core::convert::TryFrom<&str> for ColorMode {
     }
 }
 
-// ===== Target sink =====
 /// Output target
 #[derive(Copy, Clone)]
 pub enum Target {
@@ -269,7 +266,7 @@ const fn civil_from_days_utc(days_since_unix_epoch: i64) -> (i32, u32, u32) {
     let mp = (5 * yd + 2) / 153; // [0, 11]
     let d = yd - (153 * mp + 2) / 5 + 1; // [1, 31]
     let m = mp + 3 - 12 * (mp / 10); // [1, 12]
-    let y = 100 * era + yoe + (m <= 2) as i64; // year
+    let y = 400 * era + yoe + (m <= 2) as i64; // year
     #[allow(clippy::cast_possible_truncation)]
     #[allow(clippy::cast_sign_loss)]
     (y as i32, m as u32, d as u32)
@@ -300,21 +297,20 @@ fn write_timestamp(mut w: impl Write) {
     #[cfg(all(feature = "timestamp", feature = "localtime"))]
     {
         // Local time via `time` crate if you enable the `localtime` feature
+        static TS_FMT: OnceLock<Vec<time::format_description::FormatItem<'static>>> =
+            OnceLock::new();
+        let fmt = TS_FMT.get_or_init(|| {
+            time::format_description::parse(
+                "[year]-[month]-[day] [hour]:[minute]:[second].[subsecond digits:3]",
+            )
+            .expect("valid timestamp format description")
+        });
+
         let now = std::time::SystemTime::now();
         let now: time::OffsetDateTime = now.into();
         let now =
             now.to_offset(time::UtcOffset::current_local_offset().unwrap_or(time::UtcOffset::UTC));
-        let _ = write!(
-            w,
-            "{} ",
-            now.format(
-                &time::format_description::parse(
-                    "[year]-[month]-[day] [hour]:[minute]:[second].[subsecond digits:3]"
-                )
-                .unwrap()
-            )
-            .unwrap()
-        );
+        let _ = write!(w, "{} ", now.format(fmt).unwrap());
     }
 }
 
